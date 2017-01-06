@@ -202,6 +202,7 @@ namespace {
   const Score Hanging             = S(48, 27);
   const Score ThreatByPawnPush    = S(38, 22);
   const Score HinderPassedPawn    = S( 7,  0);
+  const Score StopPoint           = S(10,  6);
 
   // Penalty for a bishop on a1/h1 (a8/h8 for black) which is trapped by
   // a friendly pawn on b2/g2 (b7/g7 for black). This can obviously only
@@ -297,7 +298,22 @@ namespace {
         mobility[Us] += MobilityBonus[Pt][mob];
 
         if (Pt == BISHOP || Pt == KNIGHT)
-        {
+                {
+
+             // Control enemy pawn stop point by a minor
+             if (     relative_rank(Us, s) < RANK_7
+                &&  (pos.pieces(Them, PAWN) & (s + pawn_push(Us))))
+                {
+                    Bitboard dangermask = (rank_bb(rank_of(s + pawn_push(Us)))
+                    		            |  rank_bb(rank_of(s + pawn_push(Us)*2)))
+                	                    & (pos.pieces(Them, PAWN) & pawn_attack_span(Us, s));
+
+                    if (!(pos.pieces(Them, PAWN) & pawn_attack_span(Us, s)))
+                    	relative_rank(Us, s) > RANK_3 ? score += StopPoint*2 : score += StopPoint;
+
+                	else if (relative_rank(Us, s) < RANK_4 && !dangermask)
+                		score += StopPoint;
+                }
             // Bonus for outpost squares
             bb = OutpostRanks & ~ei.pi->pawn_attacks_span(Them);
             if (bb & s)
