@@ -316,10 +316,8 @@ namespace {
                 score += MinorBehindPawn;
 
             // Minors on center squares are better if not under enemy minors attack
-            if (      ( Center & s)
-            	  && !((ei.attackedBy[Them][BISHOP] |
-                            ei.attackedBy[Them][KNIGHT] | ei.attackedBy[Them][PAWN]) & s))
-            	score += MinorOnCenter;
+            if ( Center & s)
+                score += MinorOnCenter;
 
             // Penalty for pawns on the same color square as the bishop
             if (Pt == BISHOP)
