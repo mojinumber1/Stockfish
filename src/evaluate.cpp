@@ -202,6 +202,9 @@ namespace {
   const Score Hanging             = S(48, 27);
   const Score ThreatByPawnPush    = S(38, 22);
   const Score HinderPassedPawn    = S( 7,  0);
+  Score MinorOnCenter             = S(11,  0);
+
+  TUNE(SetRange(-100, 100),MinorOnCenter);
 
   // Penalty for a bishop on a1/h1 (a8/h8 for black) which is trapped by
   // a friendly pawn on b2/g2 (b7/g7 for black). This can obviously only
@@ -313,6 +316,10 @@ namespace {
             if (    relative_rank(Us, s) < RANK_5
                 && (pos.pieces(PAWN) & (s + pawn_push(Us))))
                 score += MinorBehindPawn;
+
+            // Minors on center squares are better if not under enemy minors attack
+            if ( Center & s)
+               score += MinorOnCenter;
 
             // Penalty for pawns on the same color square as the bishop
             if (Pt == BISHOP)
