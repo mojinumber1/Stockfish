@@ -202,6 +202,9 @@ namespace {
   const Score Hanging             = S(48, 27);
   const Score ThreatByPawnPush    = S(38, 22);
   const Score HinderPassedPawn    = S( 7,  0);
+  Score BackwardThreat      	  = S( 0,  0);
+
+  TUNE(SetRange(-100, 100),BackwardThreat);
 
   // Penalty for a bishop on a1/h1 (a8/h8 for black) which is trapped by
   // a friendly pawn on b2/g2 (b7/g7 for black). This can obviously only
@@ -517,8 +520,26 @@ namespace {
     const Bitboard TRank2BB = (Us == WHITE ? Rank2BB    : Rank7BB);
     const Bitboard TRank7BB = (Us == WHITE ? Rank7BB    : Rank2BB);
 
-    Bitboard b, weak, defended, safeThreats;
+    Bitboard b, weak, defended, safeThreats, backwardpawns;
     Score score = SCORE_ZERO;
+
+    // Small bonus if the opponent has backward pawn and it is under our attack
+    backwardpawns = ei.pi->backward_pawns(Them);
+    if (backwardpawns)
+    {
+
+    	b = backwardpawns & ei.attackedBy[Us][ALL_PIECES];
+    	while (b)
+    	{
+    	Square s = 	pop_lsb(&b);
+    	for (PieceType i = KNIGHT; i < KING; ++i)
+    	{
+    		if (ei.attackedBy[Us][i] & s)
+    	    score += BackwardThreat;
+    	}
+    	}
+    }
+
 
     // Small bonus if the opponent has loose pawns or pieces
     if (   (pos.pieces(Them) ^ pos.pieces(Them, QUEEN, KING))
@@ -672,8 +693,8 @@ namespace {
                 mbonus += rr + r * 2, ebonus += rr + r * 2;
         } // rr != 0
 
-        // Assign a small bonus when no pieces left (unstoppable)
-        if (!pos.non_pawn_material(Us) && !pos.non_pawn_material(Them))
+        // Assign a small bonus when the opponent has no pieces left
+        if (!pos.non_pawn_material(Them))
             ebonus += 20;
 
         score += make_score(mbonus, ebonus) + PassedFile[file_of(s)];
