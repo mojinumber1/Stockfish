@@ -106,7 +106,7 @@ namespace {
     Bitboard ourPawns   = pos.pieces(Us  , PAWN);
     Bitboard theirPawns = pos.pieces(Them, PAWN);
 
-    e->passedPawns[Us]   = e->pawnAttacksSpan[Us] = 0;
+    e->passedPawns[Us]   = e->pawnAttacksSpan[Us] = e->backwardPawns[Us] = 0;
     e->semiopenFiles[Us] = 0xFF;
     e->kingSquares[Us]   = SQ_NONE;
     e->pawnAttacks[Us]   = shift<Right>(ourPawns) | shift<Left>(ourPawns);
@@ -159,8 +159,12 @@ namespace {
         if (!neighbours)
             score -= Isolated[opposed];
 
+
         else if (backward)
+        {
             score -= Backward[opposed];
+            e->backwardPawns[Us] |= s;
+        }
 
         else if (!supported)
             score -= Unsupported;
