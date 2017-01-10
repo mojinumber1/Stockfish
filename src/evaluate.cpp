@@ -630,6 +630,11 @@ namespace {
         {
             Square blockSq = s + pawn_push(Us);
 
+            // if the pawn is blocked by a knight:
+            if (pos.pieces(Them, KNIGHT) & blockSq)
+            	mbonus -= 11;
+
+
             // Adjust bonus based on the king's proximity
             ebonus +=  distance(pos.square<KING>(Them), blockSq) * 5 * rr
                      - distance(pos.square<KING>(Us  ), blockSq) * 2 * rr;
