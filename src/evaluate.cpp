@@ -221,6 +221,10 @@ namespace {
   const int BishopCheck       = 588;
   const int KnightCheck       = 924;
 
+  int MPassedBlock             = 11;
+  int EPassedBlock             =  0;
+  TUNE(SetRange(-50, 50),MPassedBlock, EPassedBlock);
+
 
   // eval_init() initializes king and attack bitboards for a given color
   // adding pawn attacks. To be done at the beginning of the evaluation.
@@ -629,6 +633,10 @@ namespace {
         if (rr)
         {
             Square blockSq = s + pawn_push(Us);
+
+            // if the pawn is blocked by a knight:
+            if (pos.pieces(Them, KNIGHT) & blockSq)
+            	mbonus -= MPassedBlock, ebonus -= EPassedBlock;
 
             // Adjust bonus based on the king's proximity
             ebonus +=  distance(pos.square<KING>(Them), blockSq) * 5 * rr
