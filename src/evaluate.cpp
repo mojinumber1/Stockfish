@@ -202,6 +202,7 @@ namespace {
   const Score Hanging             = S(48, 27);
   const Score ThreatByPawnPush    = S(38, 22);
   const Score HinderPassedPawn    = S( 7,  0);
+  const Score DoubleRook7th       = S(17,  0);
 
   // Penalty for a bishop on a1/h1 (a8/h8 for black) which is trapped by
   // a friendly pawn on b2/g2 (b7/g7 for black). This can obviously only
@@ -337,9 +338,14 @@ namespace {
 
         if (Pt == ROOK)
         {
+        	Bitboard Rank7TH = (Us == WHITE ? Rank7BB : Rank2BB);
             // Bonus for aligning with enemy pawns on the same rank/file
             if (relative_rank(Us, s) >= RANK_5)
                 score += RookOnPawn * popcount(pos.pieces(Them, PAWN) & PseudoAttacks[ROOK][s]);
+
+            if (   relative_rank(Us, s) == RANK_7
+               && (popcount(Rank7TH & pos.pieces(Us, ROOK)) == 2))
+                score += DoubleRook7th;
 
             // Bonus when on an open or semi-open file
             if (ei.pi->semiopen_file(Us, file_of(s)))
