@@ -197,6 +197,7 @@ namespace {
   const Score Hanging             = S(48, 27);
   const Score ThreatByPawnPush    = S(38, 22);
   const Score HinderPassedPawn    = S( 7,  0);
+  const Score MOBILITYIM          = S( 1,  1);
 
   // Penalty for a bishop on a1/h1 (a8/h8 for black) which is trapped by
   // a friendly pawn on b2/g2 (b7/g7 for black). This can obviously only
@@ -361,6 +362,12 @@ namespace {
                     && !ei.pe->semiopen_side(Us, file_of(ksq), file_of(s) < file_of(ksq)))
                     score -= (TrappedRook - make_score(mob * 22, 0)) * (1 + !pos.can_castle(Us));
             }
+        }
+
+        if (Pt == ALL_PIECES)
+        {
+        if ((popcount(b & ei.mobilityArea[Us]) > 4))
+        score += MOBILITYIM * (popcount(b & ei.mobilityArea[Us]));
         }
 
         if (Pt == QUEEN)
